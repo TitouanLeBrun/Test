@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MauiApp1.ViewModels"
+             x:Class="MauiApp1.MainPage">
+
+    <ContentPage.BindingContext>
+        <vm:AlimentsViewModel />
+    </ContentPage.BindingContext>
+
+    <VerticalStackLayout Padding="20">
+        <CollectionView ItemsSource="{Binding Aliments}" ItemsLayout="HorizontalList">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Margin="10,0">
+                        <Label Text="{Binding Nom}" FontAttributes="Bold" />
+                        <ListView ItemsSource="{Binding Nutriments}" HasUnevenRows="True">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ViewCell>
+                                        <HorizontalStackLayout>
+                                            <Label Text="{Binding Nom}" />
+                                            <Entry Text="{Binding ValeurAffichage, Mode=TwoWay}" 
+                                                   Keyboard="Numeric"
+                                                   TextChanged="Entry_TextChanged"
+                                                   Margin="10,0,0,0"/>
+                                        </HorizontalStackLayout>
+                                    </ViewCell>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <Button Text="Action"
+                IsEnabled="{Binding CanClickOnThatButton}" />
+        <Button Text="Valider les modifications"
+                Command="{Binding ValiderCommand}" />
+        <Button Text="Réinitialiser"
+                Command="{Binding ReinitialiserCommand}" />
+    </VerticalStackLayout>
+</ContentPage>
