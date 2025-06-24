@@ -8,36 +8,60 @@
         <vm:AlimentsViewModel />
     </ContentPage.BindingContext>
 
-    <VerticalStackLayout Padding="20">
-        <CollectionView ItemsSource="{Binding Aliments}" ItemsLayout="HorizontalList">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <VerticalStackLayout Margin="10,0">
-                        <Label Text="{Binding Nom}" FontAttributes="Bold" />
-                        <ListView ItemsSource="{Binding Nutriments}" HasUnevenRows="True">
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <ViewCell>
-                                        <HorizontalStackLayout>
-                                            <Label Text="{Binding Nom}" />
-                                            <Entry Text="{Binding ValeurAffichage, Mode=TwoWay}" 
-                                                   Keyboard="Numeric"
-                                                   TextChanged="Entry_TextChanged"
-                                                   Margin="10,0,0,0"/>
-                                        </HorizontalStackLayout>
-                                    </ViewCell>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-        <Button Text="Action"
-                IsEnabled="{Binding CanClickOnThatButton}" />
-        <Button Text="Valider les modifications"
-                Command="{Binding ValiderCommand}" />
-        <Button Text="Réinitialiser"
-                Command="{Binding ReinitialiserCommand}" />
-    </VerticalStackLayout>
+    <ScrollView Orientation="Both">
+        <VerticalStackLayout Padding="20" Spacing="10">
+            <!-- En-tête dynamique -->
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Text="Jours" FontAttributes="Bold" Grid.Column="0"/>
+                <CollectionView ItemsSource="{Binding AlimentsParJour[0].Aliments}" Grid.Column="1" ItemsLayout="HorizontalList">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Label Text="{Binding Nom}" FontAttributes="Bold" Margin="20,0"/>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+
+            <!-- Affichage dynamique des valeurs -->
+            <CollectionView ItemsSource="{Binding AlimentsParJour}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- Jour -->
+                            <Label Text="{Binding Jour}" FontAttributes="Bold" Grid.Column="0" VerticalOptions="Center"/>
+                            <!-- Valeurs des aliments pour ce jour (un seul nutriment par aliment) -->
+                            <CollectionView ItemsSource="{Binding Aliments}" Grid.Column="1" ItemsLayout="HorizontalList">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Entry Text="{Binding Nutriments[0].ValeurAffichage, Mode=TwoWay}"
+                                               Keyboard="Numeric"
+                                               TextChanged="Entry_TextChanged"
+                                               Margin="10,0,0,0"/>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.Footer>
+                    <Button Text="+" Command="{Binding AjouterJourCommand}" />
+                </CollectionView.Footer>
+            </CollectionView>
+
+            <Button Text="Action"
+                    IsEnabled="{Binding CanClickOnThatButton}" />
+            <Button Text="Valider les modifications"
+                    Command="{Binding ValiderCommand}" />
+            <Button Text="Réinitialiser"
+                    Command="{Binding ReinitialiserCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

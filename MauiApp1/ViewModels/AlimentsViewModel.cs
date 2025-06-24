@@ -9,8 +9,8 @@ namespace MauiApp1.ViewModels
 {
     public class AlimentsViewModel : INotifyPropertyChanged
     {
-        public ObservableCollection<Aliment> Aliments { get; set; } = new();
-        private List<Aliment> _alimentsDerniereValidation = new();
+        public ObservableCollection<AlimentJour> AlimentsParJour { get; set; } = new();
+        private List<AlimentJour> _alimentsDerniereValidation = new();
 
         private bool _canClickOnThatButton = true;
         public bool CanClickOnThatButton
@@ -26,44 +26,61 @@ namespace MauiApp1.ViewModels
             }
         }
 
+        // Ajoutez cette propriété pour exposer la liste des noms de nutriments (pour l'en-tête)
+        public List<string> NomsNutriments { get; set; } = new();
+
         public ICommand ValiderCommand { get; }
         public ICommand ReinitialiserCommand { get; }
+        public ICommand AjouterJourCommand { get; }
 
         public AlimentsViewModel()
         {
-            var aliment1 = new Aliment
+            var nutrimentsReference = new List<Nutriment>
             {
-                Nom = "Pomme",
-                Nutriments = new List<Nutriment>
-                {
-                    new Nutriment { Nom = "Vitamine C", Valeur = 5.0 },
-                    new Nutriment { Nom = "Fibre", Valeur = 2.0 }
-                }
+                new Nutriment { Nom = "Vitamine C", Valeur = 0.0 },
+                new Nutriment { Nom = "Fibre", Valeur = 0.0 },
+                new Nutriment { Nom = "Potassium", Valeur = 0.0 }
             };
-            var aliment2 = new Aliment
-            {
-                Nom = "Banane",
-                Nutriments = new List<Nutriment>
-                {
-                    new Nutriment { Nom = "Potassium", Valeur = 10.0 }
-                }
-            };
-            Aliments.Add(aliment1);
-            Aliments.Add(aliment2);
 
-            foreach (var aliment in Aliments)
+            // Exemple de jours
+            var jours = new[] { "Lundi", "Mardi", "Mercredi" };
+
+            foreach (var jour in jours)
             {
-                foreach (var nutriment in aliment.Nutriments)
+                var aliments = new List<Aliment>
                 {
-                    nutriment.ValeurAffichageChanged += Nutriment_ValeurAffichageChanged;
+                    new Aliment
+                    {
+                        Nom = "Pomme",
+                        Nutriments = nutrimentsReference
+                            .Select(n => new Nutriment { Nom = n.Nom, Valeur = n.Nom == "Vitamine C" ? 5.0 : n.Nom == "Fibre" ? 2.0 : 0.0 })
+                            .ToList()
+                    },
+                    new Aliment
+                    {
+                        Nom = "Banane",
+                        Nutriments = nutrimentsReference
+                            .Select(n => new Nutriment { Nom = n.Nom, Valeur = n.Nom == "Potassium" ? 10.0 : 0.0 })
+                            .ToList()
+                    }
+                };
+
+                foreach (var aliment in aliments)
+                {
+                    foreach (var nutriment in aliment.Nutriments)
+                    {
+                        nutriment.ValeurAffichageChanged += Nutriment_ValeurAffichageChanged;
+                    }
                 }
+
+                AlimentsParJour.Add(new AlimentJour { Jour = jour, Aliments = aliments });
             }
 
-            // Sauvegarde initiale
             MemoriserValidation();
 
             ValiderCommand = new Command(OnValider);
             ReinitialiserCommand = new Command(OnReinitialiser);
+            AjouterJourCommand = new Command(AjouterJour);
         }
 
         private void Nutriment_ValeurAffichageChanged(object? sender, EventArgs e)
@@ -79,19 +96,41 @@ namespace MauiApp1.ViewModels
 
         private void OnReinitialiser()
         {
-            Aliments.Clear();
-            foreach (var aliment in _alimentsDerniereValidation.DeepClone())
+            AlimentsParJour.Clear();
+            foreach (var alimentJour in _alimentsDerniereValidation.DeepClone())
             {
-                foreach (var nutriment in aliment.Nutriments)
-                    nutriment.ValeurAffichageChanged += Nutriment_ValeurAffichageChanged;
-                Aliments.Add(aliment);
+                foreach (var aliment in alimentJour.Aliments)
+                {
+                    foreach (var nutriment in aliment.Nutriments)
+                        nutriment.ValeurAffichageChanged += Nutriment_ValeurAffichageChanged;
+                }
+                AlimentsParJour.Add(alimentJour);
             }
             CanClickOnThatButton = true;
         }
 
         private void MemoriserValidation()
         {
-            _alimentsDerniereValidation = Aliments.DeepClone().ToList();
+            _alimentsDerniereValidation = AlimentsParJour.DeepClone().ToList();
+        }
+
+        private void AjouterJour()
+        {
+            var nouveauJour = $"Jour {AlimentsParJour.Count + 1}";
+            var reference = AlimentsParJour[0].Aliments.Select(a => a.Nom).ToList();
+            var nutrimentsReference = AlimentsParJour[0].Aliments[0].Nutriments.Select(n => n.Nom).ToList();
+
+            var nouveauxAliments = reference.Select(nom => new Aliment
+            {
+                Nom = nom,
+                Nutriments = nutrimentsReference.Select(nomNutriment => new Nutriment { Nom = nomNutriment, Valeur = 0.0 }).ToList()
+            }).ToList();
+
+            foreach (var aliment in nouveauxAliments)
+                foreach (var nutriment in aliment.Nutriments)
+                    nutriment.ValeurAffichageChanged += Nutriment_ValeurAffichageChanged;
+
+            AlimentsParJour.Add(new AlimentJour { Jour = nouveauJour, Aliments = nouveauxAliments });
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

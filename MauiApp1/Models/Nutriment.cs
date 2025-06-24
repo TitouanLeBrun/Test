@@ -5,8 +5,13 @@ namespace MauiApp1.Models
 {
     public class Nutriment : INotifyPropertyChanged
     {
+        public Nutriment()
+        {
+            _valeur = 0.0;
+            _valeurAffichage = _valeur.ToString("0.##", CultureInfo.InvariantCulture);
+        }
         private double _valeur;
-        private string? _valeurAffichage;
+        private string _valeurAffichage;
 
         public required string Nom { get; set; }
 
@@ -25,7 +30,7 @@ namespace MauiApp1.Models
             }
         }
 
-        public string? ValeurAffichage
+        public string ValeurAffichage
         {
             get => _valeurAffichage;
             set
