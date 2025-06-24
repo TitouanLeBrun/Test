@@ -2,7 +2,8 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MauiApp1.ViewModels"
-             x:Class="MauiApp1.MainPage">
+             x:Class="MauiApp1.MainPage"
+             x:Name="MainPagee">
 
     <ContentPage.BindingContext>
         <vm:AlimentsViewModel />
@@ -33,7 +34,8 @@
                         <Grid ColumnSpacing="10">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <!-- Jour -->
                             <Label Text="{Binding Jour}" FontAttributes="Bold" Grid.Column="0" VerticalOptions="Center"/>
@@ -48,6 +50,15 @@
                                     </DataTemplate>
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
+                            <!-- Boutons d'insertion et suppression -->
+                            <VerticalStackLayout Grid.Column="2" Spacing="3">
+                                <Button Text="+" 
+                                        Command="{Binding BindingContext.InsererJourCommand, Source={x:Reference MainPagee}}" 
+                                        CommandParameter="{Binding Index}" />
+                                <Button Text="-" 
+                                        Command="{Binding BindingContext.SupprimerJourCommand, Source={x:Reference MainPagee}}" 
+                                        CommandParameter="{Binding Index}" />
+                            </VerticalStackLayout>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

@@ -26,12 +26,11 @@ namespace MauiApp1.ViewModels
             }
         }
 
-        // Ajoutez cette propriété pour exposer la liste des noms de nutriments (pour l'en-tête)
-        public List<string> NomsNutriments { get; set; } = new();
-
         public ICommand ValiderCommand { get; }
         public ICommand ReinitialiserCommand { get; }
         public ICommand AjouterJourCommand { get; }
+        public ICommand InsererJourCommand { get; }
+        public ICommand SupprimerJourCommand { get; }
 
         public AlimentsViewModel()
         {
@@ -81,6 +80,8 @@ namespace MauiApp1.ViewModels
             ValiderCommand = new Command(OnValider);
             ReinitialiserCommand = new Command(OnReinitialiser);
             AjouterJourCommand = new Command(AjouterJour);
+            InsererJourCommand = new Command<int>(InsererJour);
+            SupprimerJourCommand = new Command<int>(SupprimerJour);
         }
 
         private void Nutriment_ValeurAffichageChanged(object? sender, EventArgs e)
@@ -106,6 +107,7 @@ namespace MauiApp1.ViewModels
                 }
                 AlimentsParJour.Add(alimentJour);
             }
+            MettreAJourIndex();
             CanClickOnThatButton = true;
         }
 
@@ -131,6 +133,42 @@ namespace MauiApp1.ViewModels
                     nutriment.ValeurAffichageChanged += Nutriment_ValeurAffichageChanged;
 
             AlimentsParJour.Add(new AlimentJour { Jour = nouveauJour, Aliments = nouveauxAliments });
+            MettreAJourIndex();
+        }
+        private void InsererJour(int index)
+        {
+            int indexJour = index;
+            var nouveauJour = $"Jour {index + 1}";
+            var reference = AlimentsParJour[0].Aliments.Select(a => a.Nom).ToList();
+
+            var nouveauxAliments = reference.Select(nom => new Aliment
+            {
+                Nom = nom,
+                Nutriments = new List<Nutriment>
+        {
+            new Nutriment { Nom = "Test", Valeur = 0.0 }
+        }
+            }).ToList();
+
+            foreach (var aliment in nouveauxAliments)
+                foreach (var nutriment in aliment.Nutriments)
+                    nutriment.ValeurAffichageChanged += Nutriment_ValeurAffichageChanged;
+
+            AlimentsParJour.Insert(index, new AlimentJour { Jour = nouveauJour, Aliments = nouveauxAliments });
+            MettreAJourIndex();
+        }
+
+        private void SupprimerJour(int index)
+        {
+            if (AlimentsParJour.Count > 1 && index >= 0 && index < AlimentsParJour.Count)
+                AlimentsParJour.RemoveAt(index);
+            MettreAJourIndex();
+        }
+
+        private void MettreAJourIndex()
+        {
+            for (int i = 0; i < AlimentsParJour.Count; i++)
+                AlimentsParJour[i].Index = i;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
